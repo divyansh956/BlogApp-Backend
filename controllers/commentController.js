@@ -32,4 +32,26 @@ exports.createComment = async (req, res) => {
             error: "Error while creating comment",
         })
     }
-}
+};
+
+exports.deleteComment = async (req, res) => {
+    try {
+        const { commentId, postId } = req.body;
+        // delete the comment from the comment collection
+        await Comment.findByIdAndDelete(commentId);
+
+        const updatedPost = await Post.findByIdAndUpdate(postId, { $pull: { comments: commentId } }, { new: true }).populate("comments").populate("likes").exec();
+        res.json({
+            success: true,
+            message: "Comment Deleted",
+            post: updatedPost,
+        })
+    }
+    catch (err) {
+        return res.status(500).json({
+            success: false,
+            message: "Error while deleting comment",
+            error: err.message,
+        })
+    }
+};                 
