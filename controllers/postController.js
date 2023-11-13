@@ -1,10 +1,15 @@
 const Post = require("../models/postModel")
+const User = require("../models/userModel")
 
 exports.createPost = async (req, res) => {
     try {
-        const { title, body } = req.body;
+        const { title, body, user } = req.body;
         const post = new Post({ title, body });
         const savedPost = await post.save();
+
+        await User.findByIdAndUpdate(user, {
+            $push: { posts: savedPost._id }
+        }, { new: true })
 
         res.json({
             post: savedPost
